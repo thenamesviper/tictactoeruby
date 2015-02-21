@@ -4,8 +4,8 @@ class TicTacToe
 		@player1 = player1
 		@player2 = player2
 		@players = [@player1, @player2]
-		@player_turn = 0
-		@player_selected = @players[0]
+		@turn = 0
+		@player_selected = @players[@turn%2]
 		@game_over = false
 		
 		@squares = {
@@ -51,14 +51,25 @@ class TicTacToe
 	end
 	
 	def play_game
-		until @game_over
-			select_space(@player_selected)
-			game_ended?
-			@player_turn = (@player_turn+1)%2
-			@player_selected = @players[@player_turn]
-		end
-		puts "ENND"
+		victory_message = ""
+			until @game_over
+				select_space(@player_selected)
+				if !game_ended?
+					@turn += 1
+					@player_selected = @players[@turn%2]
+				else
+					victory_message =  "#{@player_selected.name} has won!"
+					@game_over = true
+				end
+				if @turn>8
+					victory_message = "The game ends in a tie"
+					@game_over = true
+				end
+			end
+		puts victory_message
+		
 	end
+	
 	def game_ended?
 		winning_arrays = [ 	#horizontals
 							[ @squares[:a], @squares[:b], @squares[:c] ], [ @squares[:d], @squares[:e], @squares[:f] ], 
@@ -69,7 +80,18 @@ class TicTacToe
 							#diagonals 
 							[ @squares[:a], @squares[:e], @squares[:i] ], [ @squares[:c], @squares[:e], @squares[:g] ]
 						]
-		
+		for i in winning_arrays
+			count = 0
+			for j in i
+				if j == @player_selected.piece
+					count += 1
+				end
+			end	
+			if count == 3
+				return true
+			end
+		end
+		return false
 	end
 	
 end
@@ -82,10 +104,14 @@ class Player
 	end	
 end
 
+puts "Type the name of the person who will be playing as X"
+name1 = gets.chomp
+puts "Type the name of the person who will be playing as O"
+name2 = gets.chomp
 
-john = Player.new("James", "X")
-rachel = Player.new("Heather", "O")
-new_game = TicTacToe.new(john, rachel)
+player1 = Player.new(name1, "X")
+player2 = Player.new(name2, "O")
+new_game = TicTacToe.new(player1, player2)
 new_game.play_game
 
 
